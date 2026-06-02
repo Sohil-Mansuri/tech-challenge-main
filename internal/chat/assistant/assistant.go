@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
+	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -142,7 +145,45 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 
 				switch call.Function.Name {
 				case "get_weather":
-					msgs = append(msgs, openai.ToolMessage("weather is fine", call.ID))
+					var payload struct {
+						Location string `json:"location"`
+					}
+
+					if err := json.Unmarshal(
+						[]byte(call.Function.Arguments),
+						&payload,
+					); err != nil {
+
+						msgs = append(
+							msgs,
+							openai.ToolMessage(
+								"failed to parse weather arguments",
+								call.ID,
+							),
+						)
+						break
+					}
+
+					weather, err := a.GetWeather(
+						ctx,
+						payload.Location,
+					)
+
+					if err != nil {
+						msgs = append(
+							msgs,
+							openai.ToolMessage(
+								"failed to get weather: "+err.Error(),
+								call.ID,
+							),
+						)
+						break
+					}
+
+					msgs = append(
+						msgs,
+						openai.ToolMessage(weather, call.ID),
+					)
 				case "get_today_date":
 					msgs = append(msgs, openai.ToolMessage(time.Now().Format(time.RFC3339), call.ID))
 				case "get_holidays":
@@ -203,4 +244,61 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 	}
 
 	return "", errors.New("too many tool calls, unable to generate reply")
+}
+
+func (a *Assistant) GetWeather(
+	ctx context.Context,
+	location string,
+) (string, error) {
+
+	apiKey := os.Getenv("WEATHER_API_KEY")
+	apiUrl := os.Getenv("WEATHER_API_URL")
+
+	url := fmt.Sprintf(
+		apiUrl,
+		apiKey,
+		url.QueryEscape(location),
+	)
+
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodGet,
+		url,
+		nil,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var apiErr model.WeatherErrorResponse
+
+		if err := json.NewDecoder(resp.Body).Decode(&apiErr); err == nil {
+			return "", fmt.Errorf("%s", apiErr.Error.Message)
+		}
+
+		return "", fmt.Errorf("weather service returned status %d", resp.StatusCode)
+	}
+	var weather model.WeatherResponse
+
+	if err := json.NewDecoder(resp.Body).Decode(&weather); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf(
+		"Location: %s, %s\nTemperature: %.1f°C\nCondition: %s\nWind Speed: %.1f kph\nHumidity: %d%%",
+		weather.Location.Name,
+		weather.Location.Country,
+		weather.Current.TempC,
+		weather.Current.Condition.Text,
+		weather.Current.WindKph,
+		weather.Current.Humidity,
+	), nil
 }
