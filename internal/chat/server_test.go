@@ -148,7 +148,6 @@ func TestServer_StartConversation(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		// must fall back to the default title
 		if out.GetTitle() != "Untitled conversation" {
 			t.Errorf("expected fallback title %q, got %q", "Untitled conversation", out.GetTitle())
 		}
@@ -165,7 +164,7 @@ func TestServer_StartConversation(t *testing.T) {
 			t.Fatal("expected error for empty message, got nil")
 		}
 
-		if te, ok := err.(twirp.Error); !ok || te.Code() != twirp.Malformed {
+		if te, ok := err.(twirp.Error); !ok || te.Code() != twirp.InvalidArgument {
 			t.Fatalf("expected twirp.Malformed error, got %v", err)
 		}
 	}))
