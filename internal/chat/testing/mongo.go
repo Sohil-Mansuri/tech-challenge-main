@@ -17,7 +17,7 @@ func ConnectMongo() *mongo.Database {
 	once.Do(func() {
 		uri := os.Getenv("MONGODB_URI")
 		if uri == "" {
-			uri = "mongodb://acai:travel@localhost:27017"
+			uri = "mongodb://localhost:27017/"
 		}
 
 		dbname := os.Getenv("MONGODB_DATABASE")
