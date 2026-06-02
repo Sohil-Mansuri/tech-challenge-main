@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,12 +11,26 @@ import (
 	"github.com/acai-travel/tech-challenge/internal/chat/model"
 	"github.com/acai-travel/tech-challenge/internal/httpx"
 	"github.com/acai-travel/tech-challenge/internal/mongox"
+	"github.com/acai-travel/tech-challenge/internal/otelx"
 	"github.com/acai-travel/tech-challenge/internal/pb"
 	"github.com/gorilla/mux"
 	"github.com/twitchtv/twirp"
 )
 
 func main() {
+
+	ctx := context.Background()
+
+	shutdown, err := otelx.Setup(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("failed to initialise OpenTelemetry: %v", err))
+	}
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			slog.Error("OpenTelemetry shutdown error", "error", err)
+		}
+	}()
+
 	mongo := mongox.MustConnect()
 
 	repo := model.New(mongo)
@@ -26,6 +41,8 @@ func main() {
 	// Configure handler
 	handler := mux.NewRouter()
 	handler.Use(
+		httpx.Tracing(),
+		httpx.Metrics(),
 		httpx.Logger(),
 		httpx.Recovery(),
 	)
