@@ -57,12 +57,6 @@ func (a *Assistant) Title(ctx context.Context, conv *model.Conversation) (string
 		title = title[:80]
 	}
 
-	slog.InfoContext(ctx,
-		"title response",
-		"choices", len(resp.Choices),
-		"content", resp.Choices[0].Message.Content,
-	)
-
 	return title, nil
 }
 
