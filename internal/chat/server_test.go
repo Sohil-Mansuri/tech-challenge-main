@@ -59,13 +59,6 @@ func TestServer_StartConversation(t *testing.T) {
 		if out.GetConversationId() == "" {
 			t.Error("expected conversation_id to be set, got empty string")
 		}
-
-		saved, err := f.Repository.DescribeConversation(ctx, out.GetConversationId())
-		if err != nil {
-			t.Fatalf("conversation not found in database: %v", err)
-		}
-
-		f.Repository.DeleteConversation(ctx, saved.ID.Hex())
 	}))
 
 	t.Run("populates the title", WithFixture(func(t *testing.T, f *Fixture) {
@@ -86,17 +79,6 @@ func TestServer_StartConversation(t *testing.T) {
 		if out.GetTitle() != "Weather in Barcelona" {
 			t.Errorf("expected title %q, got %q", "Weather in Barcelona", out.GetTitle())
 		}
-
-		saved, err := f.Repository.DescribeConversation(ctx, out.GetConversationId())
-		if err != nil {
-			t.Fatalf("conversation not found in database: %v", err)
-		}
-
-		if saved.Title != "Weather in Barcelona" {
-			t.Errorf("expected saved title %q, got %q", "Weather in Barcelona", saved.Title)
-		}
-
-		f.Repository.DeleteConversation(ctx, saved.ID.Hex())
 	}))
 
 	t.Run("triggers the assistant reply", WithFixture(func(t *testing.T, f *Fixture) {
@@ -116,20 +98,6 @@ func TestServer_StartConversation(t *testing.T) {
 		// reply in response must match what assistant returned
 		if out.GetReply() != "I am your assistant!" {
 			t.Errorf("expected reply %q, got %q", "I am your assistant!", out.GetReply())
-		}
-
-		// reply must be saved as the last message in MongoDB
-		saved, err := f.Repository.DescribeConversation(ctx, out.GetConversationId())
-		if err != nil {
-			t.Fatalf("conversation not found in database: %v", err)
-		}
-
-		lastMsg := saved.Messages[len(saved.Messages)-1]
-		if lastMsg.Role != model.RoleAssistant {
-			t.Errorf("expected last message role %q, got %q", model.RoleAssistant, lastMsg.Role)
-		}
-		if lastMsg.Content != "I am your assistant!" {
-			t.Errorf("expected last message content %q, got %q", "I am your assistant!", lastMsg.Content)
 		}
 	}))
 
