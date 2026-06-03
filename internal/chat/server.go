@@ -95,9 +95,14 @@ func (s *Server) StartConversation(ctx context.Context, req *pb.StartConversatio
 		UpdatedAt: time.Now(),
 	})
 
-	if err := s.repo.CreateConversation(ctx, conversation); err != nil {
-		return nil, err
-	}
+	// Save to MongoDB in background — user doesn't need to wait for this
+	go func() {
+		// use a fresh context — original ctx may cancel after response is sent
+		saveCtx := context.Background()
+		if err := s.repo.CreateConversation(saveCtx, conversation); err != nil {
+			slog.ErrorContext(saveCtx, "Failed to save conversation", "error", err, "conversation_id", conversation.ID.Hex())
+		}
+	}()
 
 	return &pb.StartConversationResponse{
 		ConversationId: conversation.ID.Hex(),
