@@ -18,7 +18,6 @@ type HolidaysTool struct{}
 
 func (t *HolidaysTool) Name() string { return "get_holidays" }
 
-
 // Definition tells OpenAI about this tool and its optional filter parameters.
 func (t *HolidaysTool) Definition() openai.ChatCompletionToolUnionParam {
 	return openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
@@ -65,6 +64,12 @@ func (t *HolidaysTool) Execute(ctx context.Context, args string) (string, error)
 	events, err := LoadCalendar(ctx, link)
 	if err != nil {
 		return "", fmt.Errorf("failed to load calendar: %w", err)
+	}
+
+	// Only default AfterDate to today if caller did not specify ANY date filter
+	// If they asked for before_date, they want historical data — don't restrict
+	if payload.AfterDate.IsZero() && payload.BeforeDate.IsZero() {
+		payload.AfterDate = time.Now()
 	}
 
 	// Filter and format holidays

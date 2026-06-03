@@ -1,8 +1,3 @@
-// Package otelx configures OpenTelemetry metric and trace providers.
-// It uses stdout exporters so that metrics and spans are visible in the
-// process log without requiring an external collector.  Swap the exporters
-// for OTLP when you want to send data to a real backend (Prometheus,
-// Tempo, Jaeger, …).
 package otelx
 
 import (
