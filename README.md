@@ -1,180 +1,277 @@
-# Acai Technical Challenge
+# Acai Travel AI Assistant
 
-This technical challenge is part of the interview process for a Software Engineer position at [Acai Travel](https://acaitravel.com). 
-If you weren't sent here by one of our engineers, you can [get started here](https://www.acaitravel.com/about/careers).
+A conversational AI assistant backend built in Go, powered by OpenAI and MongoDB. Users can start and continue conversations, and the assistant can answer travel-related questions using real-time tools.
 
-We know you're eager to get to the code, but please read the instructions carefully before you begin.
+---
 
-The challenge might seem tricky at first, but once you get into it, we hope you'll enjoy the process and have fun 
-working with AI and Go.
+## API Flows
 
-## Introduction
-
-In this challenge, you'll work on an existing application from this repository, written in [Go](https://go.dev). You can 
-make changes, add features, refactor existing code, etc. Think of it as if you've just joined a team and received a task 
-to improve an existing codebase.
-
-You will be given a few specific [tasks to complete](#Tasks), but feel free to do some housekeeping if you see something that 
-could be improved.
-
-The application is a personal assistant service, which provides an API for conversations with an AI assistant. You could 
-say it's an API for an interface similar to ChatGPT: you have an endpoint to start a new conversation, an endpoint to 
-send a message to an existing conversation, a way to list conversations, and an endpoint to fetch a conversation by ID.
-
-The assistant is built on top of [OpenAI's model](https://openai.com/), but it leverages 
-[additional tools](https://platform.openai.com/docs/guides/function-calling) and potentially some clever prompting to 
-provide a more useful experience.
-
-Currently, the assistant can:
-- Answer questions about the current date and time.
-- Provide weather information (though it seems broken).
-- Provide information about holidays in Barcelona.
-- Provide general AI assistance.
-
-## About the codebase
-
-We expect you to be able to navigate and figure out the codebase on your own, but here are some key takeaways to give 
-you a boost:
-
-- There is a `Makefile` with a few handy commands like `make up` and `make run`.
-- The entry point to the application is in `cmd/server/main.go`, but the main logic lives in `internal/chat/server.go`.
-- The application stores conversations in a [MongoDB](https://www.mongodb.com/) database. There's a docker compose file 
-  to start a local MongoDB instance.
-- The application uses [Twirp](https://twitchtv.github.io/twirp/docs/intro.html) and [protobuf](https://protobuf.dev/)
-  as a framework for the API. **You do NOT need to dig deep into Twirp and protobuf**. It's easy to use, provides JSON
-  via HTTP endpoints, and "automagically" wires HTTP handlers and server implementation.
-- The project uses code generation, but you should be able to complete the challenge without needing to run or 
-  understand it. In any case, do **not** make manual changes to the `internal/pb` package, maybe consider it a blackbox.
-
-## General guidelines
-
-1. **Do not fork this repository.** Instead, create a new repository in your own GitHub account and copy the contents of 
-   this repository into it. Forks are linked to the original repository, and we'd like to avoid candidates discovering 
-   each other's solutions. Keep your repository **public** so we can see your solution.
-2. **Make use of git history.** It's easier for us to review your code if you commit your changes in meaningful chunks 
-   with clear descriptions.
-3. **Use standard Go tools.** Use the tools shipped with the Go compiler, such as `go fmt`, `go test`, etc. Avoid 
-   unnecessary dependencies or tools. Keep it simple.
-4. **Use Go conventions.** Follow Go conventions for naming, formatting, and structuring your code. Check the 
-   [Effective Go](https://go.dev/doc/effective_go) and [Go Code Review Comments](https://go.dev/wiki/CodeReviewComments).
-5. **Leave comments** where it makes sense. It helps whoever reads the code after you.
-6. **You may use AI assistance/co-pilots**, but remember we are looking for a meaningful and maintainable codebase, not 
-   something slapped together quickly.
-
-## Setting things up
-
-You'll need:
-- [Go](https://go.dev/doc/install) (use whatever version you have, or install the latest).
-- [Docker](https://docs.docker.com/get-docker/) (to run the MongoDB container).
-- The usual developer tools: git, make, etc.
-
-Set up a repository:
-1. Create a new repository in your GitHub account. Clone this repository, then copy everything except the `.git` folder 
-   into your own repo.
-2. Commit the changes as **"Initial commit"** to set your starting point.
-
-Start the application:
-1. Set your OpenAI API key in the environment variable `OPENAI_API_KEY`.
-   ```bash
-   export OPENAI_API_KEY=your_openai_api_key
-   ```
-2. Use make to start MongoDB and the application. Make sure docker daemon is running.
-   ```bash
-   make up run
-   ```
-3. You should see `Starting the server...`, indicating the HTTP server is running at [localhost:8080](http://localhost:8080).
-4. Use `command+C` to stop the server when you're done.
-5. Use `make down` to stop the MongoDB container.
-
-## Usage
-
-> Before you interact with the application, make sure it's running, follow steps in the **Setting things up** section.
-
-The application provides a simple HTTP-based API, you can interact with it using any HTTP client (like Postman, curl, 
-etc.) or use the [CLI tool](cmd/cli/README.md) provided in this repository.
-
-### CLI tool
-
-You can find [CLI tool](cmd/cli/README.md) in `cmd/cli` to interact with the application.
-
-### HTTP API
-
-We have created a [postman collection](https://documenter.getpostman.com/view/40257649/2sB3BKFo8S) for you to explore 
-the API. You can use [postman](https://www.postman.com/) or any other HTTP client.
-
-## Testing
-
-The codebase includes tests for the server and the assistant. The tests require mongoDB to be running, so make sure
-to start it with `make up` before running the tests.
-
-Run the tests using:
-```bash
-go test ./...
+All endpoints are served via Twirp over HTTP POST at:
+```
+http://localhost:8080/twirp/acai.chat.ChatService/<MethodName>
 ```
 
-## Tasks
+---
 
-**You can complete as many tasks as you like**, you can skip tasks that do not appeal to you.
-The more tasks you complete, the better we can assess your skills.
+### 1. StartConversation
 
-We would like you to spend at least 1 hour on the challenge.
+**POST** `/twirp/acai.chat.ChatService/StartConversation`
 
-### Task 1: Fix conversation title
+**Request**
+```json
+{ "message": "What is the weather in Barcelona?" }
+```
 
-> We recommend starting with this one. This task is relatively easy and requires you to debug the application, allowing you to get familiar with the codebase, and understand how the application works.
+**Flow**
+```
+Request arrives
+      │
+      ▼
+Validate message (empty = error)
+      │
+      ├─────────────────────────┐
+      ▼                         ▼
+Title() → OpenAI          Reply() → OpenAI + Tools
+(gpt-4o-mini, 20 tokens)  (gpt-4.1, 500 tokens)
+      │                         │
+      └──────────┬──────────────┘
+                 ▼
+         Both results ready
+                 │
+                 ▼
+         Append assistant message
+                 │
+                 ▼
+         Save to MongoDB (background)
+                 │
+                 ▼
+         Return response immediately
+```
 
-If you start a conversation, you'll notice the title does not really reflect the topic. Instead of summarizing your 
-question, it tries to answer it.
-
-Your task is to fix the title generation logic so it summarizes the question instead of answering it. The system should 
-generate a concise title that reflects the main topic of the conversation.
-
-For example, if you ask *"What is the weather like in Barcelona?"*, the title should be something like *"Weather in 
-Barcelona"*.
-
-**Bonus:** Optimize performance for the `StartConversation` API to make it faster.
+**Response**
+```json
+{
+  "conversation_id": "abc123",
+  "title": "Weather in Barcelona",
+  "reply": "The weather in Barcelona is currently 24°C and sunny."
+}
+```
 
 ---
 
-### Task 2: Fix the weather
+### 2. ContinueConversation
 
-The assistant is supposed to provide weather information, but currently it just says *"the weather is fine."* You need to connect it to a real weather API and return actual weather information (temperature, wind speed, conditions, etc.).
+**POST** `/twirp/acai.chat.ChatService/ContinueConversation`
 
-You can use any public weather API, e.g. [WeatherAPI](https://www.weatherapi.com/). This particular API is free to use, 
-but you need to sign up and get an API key.
+**Request**
+```json
+{
+  "conversation_id": "abc123",
+  "message": "What about tomorrow?"
+}
+```
 
-**Bonus:** Enable the assistant to provide forecast information as well as current weather.
+**Flow**
+```
+Request arrives
+      │
+      ▼
+Validate conversation_id + message
+      │
+      ▼
+Load conversation from MongoDB
+      │
+      ▼
+Append new user message
+      │
+      ▼
+Reply() → OpenAI (with full message history for context)
+      │
+      ▼
+Tool loop (up to N iterations)
+  ├── AI calls tool? → execute → loop again
+  └── AI gives answer? → done
+      │
+      ▼
+Append assistant reply
+      │
+      ▼
+Update conversation in MongoDB
+      │
+      ▼
+Return reply
+```
+
+**Response**
+```json
+{
+  "reply": "Tomorrow will be partly cloudy with a high of 22°C."
+}
+```
 
 ---
 
-### Task 3: Refactor tools
+### 3. ListConversations
 
-The team is concerned that the way tools are currently defined in the codebase makes them difficult to maintain and extend. We're planning to add many more tools to give the assistant more capabilities, so we need a robust way to define and implement tools.
+**POST** `/twirp/acai.chat.ChatService/ListConversations`
 
-Refactor `internal/assistant/assistant.go` to make working with tools easier. Feel free to split things into files, introduce new package(s), or reorganize code as you see fit.
+**Request**
+```json
+{}
+```
 
-**Bonus:** Create a new tool of your choice.
+**Flow**
+```
+Request arrives
+      │
+      ▼
+Fetch all conversations from MongoDB
+(sorted by newest first, messages excluded)
+      │
+      ▼
+Return list
+```
+
+**Response**
+```json
+{
+  "conversations": [
+    { "id": "abc123", "title": "Weather in Barcelona", "timestamp": "2026-06-03T10:00:00Z" },
+    { "id": "def456", "title": "Public Holidays in Japan", "timestamp": "2026-06-02T09:00:00Z" }
+  ]
+}
+```
 
 ---
 
-### Task 4: Create a test for StartConversation API
+### 4. DescribeConversation
 
-The team wants a test for the `StartConversation` API to ensure it works as expected. Create an automated test in `internal/chat/server_test.go` to ensure the API:
+**POST** `/twirp/acai.chat.ChatService/DescribeConversation`
 
-- Creates new conversations.
-- Populates the title.
-- Triggers the assistant's response.
-  
-**Bonus:** Add tests for assistant's `Title` method in `internal/assistant/assistant.go`.
+**Request**
+```json
+{ "conversation_id": "abc123" }
+```
+
+**Flow**
+```
+Request arrives
+      │
+      ▼
+Validate conversation_id
+      │
+      ▼
+Fetch conversation from MongoDB by ID
+      │
+      ├── Not found → return 404 error
+      └── Found → return full conversation with all messages
+```
+
+**Response**
+```json
+{
+  "conversation": {
+    "id": "abc123",
+    "title": "Weather in Barcelona",
+    "timestamp": "2026-06-03T10:00:00Z",
+    "messages": [
+      { "id": "m1", "role": "USER", "content": "What is the weather in Barcelona?", "timestamp": "..." },
+      { "id": "m2", "role": "ASSISTANT", "content": "The weather is 24°C and sunny.", "timestamp": "..." }
+    ]
+  }
+}
+```
 
 ---
 
-### Task 5: Instrument web server
+### Tool Call Flow (inside Reply)
 
-The team wants better visibility into the performance of the web server. Add some basic metrics to track the number of requests, response times, and error rates.
+When the AI needs real-time information it calls tools before answering:
 
-Use [OpenTelemetry](https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to capture metrics for the number of requests and response times.
+```
+Reply() called
+      │
+      ▼
+Send messages to OpenAI
+      │
+      ├── AI returns tool call?
+      │         │
+      │         ▼
+      │   Execute tool
+      │   ├── get_today_date   → returns current date/time
+      │   ├── get_weather      → calls WeatherAPI (current or forecast)
+      │   ├── get_holidays     → loads iCal calendar, filters by date
+      │   └── get_country_info → calls restcountries.com
+      │         │
+      │         ▼
+      │   Append tool result → loop back to OpenAI
+      │
+      └── AI returns text answer?
+                │
+                ▼
+          Return final reply
+```
 
-Keep the exporter and provider configuration simple—the key part is how you capture and configure specific metrics.
+---
 
-**Bonus:** Add tracing to the web server to track request flow through the application.
+## Changes Summary
+
+### Title Bug Fix
+
+The original `Title()` method had two bugs. First, the instruction was set as an `AssistantMessage` instead of a `SystemMessage`, so the AI treated it as something it had already said rather than an instruction to follow. Second, the for loop was overwriting index 0 of the message slice, causing the instruction to be lost entirely. The fix places the instruction as a `SystemMessage` first, then appends user messages after it using `append` so nothing is overwritten. The model was also changed from `o1` (a slow reasoning model) to `gpt-4o-mini` with a 20 token limit, which is fast and cheap for simple title generation.
+
+---
+
+### Performance Optimizations
+
+`Title()` and `Reply()` are independent — neither needs the other's result. They now run in parallel using Go goroutines and channels, so the total wait time equals the slower of the two rather than the sum of both. The MongoDB save is moved to a background goroutine so the user gets their response immediately without waiting for the database write. Tool definitions and system messages are built once at startup and stored in the Assistant struct, avoiding repeated object creation on every request. Message slices are pre-allocated with known capacity to avoid memory reallocation. The tool call iteration limit is calculated dynamically as `(numTools × 2) + 1` so it scales automatically as tools are added.
+
+---
+
+### Tools Refactoring with Strategy Pattern
+
+Originally all tool definitions and their logic were mixed together inside one large `Reply()` function. Adding a new tool required editing `Reply()` in three places: the tool definition list, the switch statement, and the handler logic. The refactor introduces a `Tool` interface with three methods — `Name()`, `Definition()`, and `Execute()`. Each tool is now its own file in the `internal/chat/assistant/tool/` package. Adding a new tool means creating one new file and registering it with one line in `New()`. The `Reply()` function never needs to change when tools are added or removed.
+
+```
+Tool interface
+├── tool_date.go      → get_today_date
+├── tool_weather.go   → get_weather (current + forecast)
+├── tool_holidays.go  → get_holidays (multi-country, date filtering)
+└── tool_country.go   → get_country_info
+```
+
+---
+
+### Country Info Tool
+
+A new tool was added using the free `restcountries.com` API — no API key required. It answers common travel questions about any of 250+ countries. The tool accepts a country name and returns capital city, official language, currency with symbol, population, region, timezones, and bordering countries. The AI automatically calls this tool when users ask about visas, money, language, or geography for a specific country.
+
+Example questions it handles:
+- "What currency does Japan use?"
+- "What language do they speak in Morocco?"
+- "What countries border India?"
+- "I am planning to visit Thailand, what do I need to know?"
+
+---
+
+### Instrumentation
+
+The server includes OpenTelemetry instrumentation with the service name `tech-challenge`. Every HTTP request is logged with method, path, and status code via the Logger middleware. Errors are logged at ERROR level and successful requests at INFO level. The Recovery middleware catches any unexpected panics and returns a 500 response instead of crashing the server. All assistant operations log the conversation ID for traceability, and tool calls log the tool name and arguments so you can see exactly what the AI requested.
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `OPENAI_API_KEY` | Yes | OpenAI API key |
+| `WEATHER_API_KEY` | Yes | WeatherAPI.com key |
+| `MONGODB_URI` | No | MongoDB connection string (default: `mongodb://acai:travel@localhost:27017`) |
+| `HOLIDAY_CALENDAR_LINK` | No | Custom iCal URL (default: Catalonia holidays) |
+
+---
+
+## Author
+
+Sohil Mansuri
+
