@@ -29,6 +29,11 @@ func NewServer(repo *model.Repository, assist Assistant) *Server {
 }
 
 func (s *Server) StartConversation(ctx context.Context, req *pb.StartConversationRequest) (*pb.StartConversationResponse, error) {
+
+	if strings.TrimSpace(req.GetMessage()) == "" {
+		return nil, twirp.RequiredArgumentError("message")
+	}
+
 	conversation := &model.Conversation{
 		ID:        primitive.NewObjectID(),
 		Title:     "Untitled conversation",
@@ -43,28 +48,49 @@ func (s *Server) StartConversation(ctx context.Context, req *pb.StartConversatio
 		}},
 	}
 
-	if strings.TrimSpace(req.GetMessage()) == "" {
-		return nil, twirp.RequiredArgumentError("message")
+	// run Title() and Reply() at the same time using goroutines
+	type titleResult struct {
+		title string
+		err   error
+	}
+	type replyResult struct {
+		reply string
+		err   error
 	}
 
-	// choose a title
-	title, err := s.assist.Title(ctx, conversation)
-	if err != nil {
-		slog.ErrorContext(ctx, "Failed to generate conversation title", "error", err)
+	titleCh := make(chan titleResult, 1)
+	replyCh := make(chan replyResult, 1)
+
+	// goroutine 1 — generate title in background
+	go func() {
+		title, err := s.assist.Title(ctx, conversation)
+		titleCh <- titleResult{title: title, err: err}
+	}()
+
+	// goroutine 2 — generate reply in background
+	go func() {
+		reply, err := s.assist.Reply(ctx, conversation)
+		replyCh <- replyResult{reply: reply, err: err}
+	}()
+
+	// wait for both to finish and collect results
+	titleRes := <-titleCh
+	replyRes := <-replyCh
+
+	if titleRes.err != nil {
+		slog.ErrorContext(ctx, "Failed to generate conversation title", "error", titleRes.err)
 	} else {
-		conversation.Title = title
+		conversation.Title = titleRes.title
 	}
 
-	// generate a reply
-	reply, err := s.assist.Reply(ctx, conversation)
-	if err != nil {
-		return nil, err
+	if replyRes.err != nil {
+		return nil, replyRes.err
 	}
 
 	conversation.Messages = append(conversation.Messages, &model.Message{
 		ID:        primitive.NewObjectID(),
 		Role:      model.RoleAssistant,
-		Content:   reply,
+		Content:   replyRes.reply,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
@@ -76,7 +102,7 @@ func (s *Server) StartConversation(ctx context.Context, req *pb.StartConversatio
 	return &pb.StartConversationResponse{
 		ConversationId: conversation.ID.Hex(),
 		Title:          conversation.Title,
-		Reply:          reply,
+		Reply:          replyRes.reply,
 	}, nil
 }
 
