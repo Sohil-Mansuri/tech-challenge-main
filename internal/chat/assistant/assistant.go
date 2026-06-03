@@ -13,19 +13,30 @@ import (
 
 // Assistant handles AI conversations using OpenAI and a set of tools.
 type Assistant struct {
-	cli   openai.Client
-	tools []tool.Tool // all registered tools
+	cli      openai.Client
+	tools    []tool.Tool
+	toolDefs []openai.ChatCompletionToolUnionParam
 }
 
 // New creates a new Assistant with all available tools registered.
 func New() *Assistant {
+
+	tools := []tool.Tool{
+		&tool.DateTool{},
+		&tool.WeatherTool{},
+		&tool.HolidaysTool{},
+	}
+
+	// build tool definitions ONCE at startup
+	toolDefs := make([]openai.ChatCompletionToolUnionParam, len(tools))
+	for i, t := range tools {
+		toolDefs[i] = t.Definition()
+	}
+
 	return &Assistant{
-		cli: openai.NewClient(),
-		tools: []tool.Tool{ // in case of new tools, just add them here
-			&tool.DateTool{},
-			&tool.WeatherTool{},
-			&tool.HolidaysTool{},
-		},
+		cli:      openai.NewClient(),
+		tools:    tools,
+		toolDefs: toolDefs, // ← stored, reused every request
 	}
 }
 
@@ -72,6 +83,7 @@ func (a *Assistant) Title(ctx context.Context, conv *model.Conversation) (string
 }
 
 func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string, error) {
+
 	if len(conv.Messages) == 0 {
 		return "", errors.New("conversation has no messages")
 	}
@@ -90,17 +102,12 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 		}
 	}
 
-	toolDefs := make([]openai.ChatCompletionToolUnionParam, len(a.tools))
-	for i, t := range a.tools {
-		toolDefs[i] = t.Definition()
-	}
-
 	// Tool call loop — AI may call tools multiple times before final answer
 	for i := 0; i < 15; i++ {
 		resp, err := a.cli.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 			Model:     openai.ChatModelGPT4_1,
 			Messages:  msgs,
-			Tools:     toolDefs,
+			Tools:     a.toolDefs,
 			MaxTokens: openai.Int(500),
 		})
 		if err != nil {
