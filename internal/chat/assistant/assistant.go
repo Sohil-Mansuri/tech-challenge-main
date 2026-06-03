@@ -28,6 +28,7 @@ func New() *Assistant {
 		&tool.DateTool{},
 		&tool.WeatherTool{},
 		&tool.HolidaysTool{},
+		&tool.CountryTool{},
 	}
 
 	// build tool definitions ONCE at startup
