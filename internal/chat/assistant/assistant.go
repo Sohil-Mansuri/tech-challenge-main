@@ -16,6 +16,7 @@ type Assistant struct {
 	cli      openai.Client
 	tools    []tool.Tool
 	toolDefs []openai.ChatCompletionToolUnionParam
+	maxIter  int
 }
 
 // New creates a new Assistant with all available tools registered.
@@ -36,7 +37,8 @@ func New() *Assistant {
 	return &Assistant{
 		cli:      openai.NewClient(),
 		tools:    tools,
-		toolDefs: toolDefs, // ← stored, reused every request
+		toolDefs: toolDefs,
+		maxIter:  (len(tools) * 2) + 1,
 	}
 }
 
@@ -102,8 +104,7 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 		}
 	}
 
-	// Tool call loop — AI may call tools multiple times before final answer
-	for i := 0; i < 15; i++ {
+	for i := 0; i < a.maxIter; i++ {
 		resp, err := a.cli.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 			Model:     openai.ChatModelGPT4_1,
 			Messages:  msgs,
