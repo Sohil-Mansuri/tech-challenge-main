@@ -16,6 +16,8 @@ type Assistant struct {
 	cli      openai.Client
 	tools    []tool.Tool
 	toolDefs []openai.ChatCompletionToolUnionParam
+	titleMsg openai.ChatCompletionMessageParamUnion
+	replyMsg openai.ChatCompletionMessageParamUnion
 	maxIter  int
 }
 
@@ -38,6 +40,8 @@ func New() *Assistant {
 		cli:      openai.NewClient(),
 		tools:    tools,
 		toolDefs: toolDefs,
+		titleMsg: openai.SystemMessage(promptTitle),
+		replyMsg: openai.SystemMessage(promptReply),
 		maxIter:  (len(tools) * 2) + 1,
 	}
 }
@@ -52,8 +56,7 @@ func (a *Assistant) Title(ctx context.Context, conv *model.Conversation) (string
 
 	// System message instructs AI to summarize, not answer
 	msgs := []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage("Generate a concise, descriptive title for the conversation based on the user message. The title should summarize the topic, not answer the question. Single line, max 80 characters, no special characters or emojis."),
-	}
+		a.titleMsg}
 
 	for _, m := range conv.Messages {
 		msgs = append(msgs, openai.UserMessage(m.Content))
@@ -93,8 +96,9 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 	slog.InfoContext(ctx, "Generating reply for conversation", "conversation_id", conv.ID)
 
 	msgs := []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage("You are a helpful, concise AI assistant. Provide accurate, safe, and clear responses."),
+		a.replyMsg,
 	}
+
 	for _, m := range conv.Messages {
 		switch m.Role {
 		case model.RoleUser:
