@@ -1,3 +1,7 @@
+ifneq (,$(wildcard .env))
+	include .env
+	export
+endif
 gen:
 	protoc --proto_path=. --twirp_out=. --go_out=. rpc/*.proto
 
