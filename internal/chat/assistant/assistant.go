@@ -47,8 +47,9 @@ func (a *Assistant) Title(ctx context.Context, conv *model.Conversation) (string
 	}
 
 	resp, err := a.cli.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-		Model:    openai.ChatModelGPT4oMini,
-		Messages: msgs,
+		Model:     openai.ChatModelGPT4oMini,
+		Messages:  msgs,
+		MaxTokens: openai.Int(20),
 	})
 
 	if err != nil {
@@ -97,9 +98,10 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 	// Tool call loop — AI may call tools multiple times before final answer
 	for i := 0; i < 15; i++ {
 		resp, err := a.cli.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-			Model:    openai.ChatModelGPT4_1,
-			Messages: msgs,
-			Tools:    toolDefs,
+			Model:     openai.ChatModelGPT4_1,
+			Messages:  msgs,
+			Tools:     toolDefs,
+			MaxTokens: openai.Int(500),
 		})
 		if err != nil {
 			return "", err
