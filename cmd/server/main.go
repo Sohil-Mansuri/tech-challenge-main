@@ -41,7 +41,7 @@ func main() {
 	// Configure handler
 	handler := mux.NewRouter()
 	handler.Use(
-		httpx.RateLimiter(2.0/60, 5),
+		httpx.RateLimiter(2, 5),
 		httpx.Tracing(),
 		httpx.Metrics(),
 		httpx.Logger(),
