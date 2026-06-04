@@ -1,6 +1,6 @@
 module github.com/acai-travel/tech-challenge
 
-go 1.24.1
+go 1.25.0
 
 require (
 	github.com/arran4/golang-ical v0.3.2
@@ -17,6 +17,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.35.0
 	go.opentelemetry.io/otel/sdk/metric v1.35.0
 	go.opentelemetry.io/otel/trace v1.35.0
+	golang.org/x/time v0.15.0
 	google.golang.org/protobuf v1.36.7
 )
 
