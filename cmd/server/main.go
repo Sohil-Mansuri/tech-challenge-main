@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/acai-travel/tech-challenge/internal/chat"
 	"github.com/acai-travel/tech-challenge/internal/chat/assistant"
@@ -13,6 +14,7 @@ import (
 	"github.com/acai-travel/tech-challenge/internal/mongox"
 	"github.com/acai-travel/tech-challenge/internal/otelx"
 	"github.com/acai-travel/tech-challenge/internal/pb"
+	"github.com/acai-travel/tech-challenge/internal/rag"
 	"github.com/gorilla/mux"
 	"github.com/twitchtv/twirp"
 )
@@ -34,7 +36,17 @@ func main() {
 	mongo := mongox.MustConnect()
 
 	repo := model.New(mongo)
-	assist := assistant.New()
+	// load vector DB (loads from disk if already ingested)
+	ragDB, err := rag.NewDB(ctx, "./data/vectordb")
+	if err != nil {
+		slog.Error("Failed to load vector DB", "error", err)
+		os.Exit(1)
+	}
+	slog.Info("Vector DB loaded",
+		"documents", ragDB.Count(),
+		"path", rag.DBPath())
+
+	assist := assistant.New(ragDB)
 
 	server := chat.NewServer(repo, assist)
 

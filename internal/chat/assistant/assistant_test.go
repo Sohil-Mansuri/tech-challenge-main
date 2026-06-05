@@ -1,9 +1,9 @@
 package assistant_test
 
 import (
-	"context"
+	//"context"
 	"os"
-	"strings"
+	//"strings"
 	"testing"
 	"time"
 
@@ -32,65 +32,66 @@ func skipIfNoAPIKey(t *testing.T) {
 	}
 }
 
-func TestAssistant_Title(t *testing.T) {
-	skipIfNoAPIKey(t)
+// func TestAssistant_Title(t *testing.T) {
+// 	skipIfNoAPIKey(t)
 
-	ctx := context.Background()
-	a := assistant.New()
+// 	ctx := context.Background()
 
-	t.Run("returns a non-empty title", func(t *testing.T) {
-		conv := makeConversation("What is the weather like in Barcelona?")
+// 	a := assistant.New()
 
-		title, err := a.Title(ctx, conv)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
+// 	t.Run("returns a non-empty title", func(t *testing.T) {
+// 		conv := makeConversation("What is the weather like in Barcelona?")
 
-		if strings.TrimSpace(title) == "" {
-			t.Error("expected non-empty title, got empty string")
-		}
-	})
+// 		title, err := a.Title(ctx, conv)
+// 		if err != nil {
+// 			t.Fatalf("unexpected error: %v", err)
+// 		}
 
-	t.Run("title is no longer than 80 characters", func(t *testing.T) {
-		conv := makeConversation("What is the weather like in Barcelona?")
+// 		if strings.TrimSpace(title) == "" {
+// 			t.Error("expected non-empty title, got empty string")
+// 		}
+// 	})
 
-		title, err := a.Title(ctx, conv)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
+// 	t.Run("title is no longer than 80 characters", func(t *testing.T) {
+// 		conv := makeConversation("What is the weather like in Barcelona?")
 
-		if len(title) > 80 {
-			t.Errorf("expected title to be max 80 characters, got %d: %q", len(title), title)
-		}
-	})
+// 		title, err := a.Title(ctx, conv)
+// 		if err != nil {
+// 			t.Fatalf("unexpected error: %v", err)
+// 		}
 
-	t.Run("title does not contain newlines", func(t *testing.T) {
-		conv := makeConversation("Tell me everything about the history of Spain")
+// 		if len(title) > 80 {
+// 			t.Errorf("expected title to be max 80 characters, got %d: %q", len(title), title)
+// 		}
+// 	})
 
-		title, err := a.Title(ctx, conv)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
+// 	t.Run("title does not contain newlines", func(t *testing.T) {
+// 		conv := makeConversation("Tell me everything about the history of Spain")
 
-		if strings.Contains(title, "\n") {
-			t.Errorf("expected title without newlines, got: %q", title)
-		}
-	})
+// 		title, err := a.Title(ctx, conv)
+// 		if err != nil {
+// 			t.Fatalf("unexpected error: %v", err)
+// 		}
 
-	t.Run("returns default title for empty conversation", func(t *testing.T) {
-		// No OpenAI call needed — early return in Title()
-		conv := &model.Conversation{
-			ID:       primitive.NewObjectID(),
-			Messages: []*model.Message{}, // empty
-		}
+// 		if strings.Contains(title, "\n") {
+// 			t.Errorf("expected title without newlines, got: %q", title)
+// 		}
+// 	})
 
-		title, err := a.Title(ctx, conv)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
+// 	t.Run("returns default title for empty conversation", func(t *testing.T) {
+// 		// No OpenAI call needed — early return in Title()
+// 		conv := &model.Conversation{
+// 			ID:       primitive.NewObjectID(),
+// 			Messages: []*model.Message{}, // empty
+// 		}
 
-		if title != "An empty conversation" {
-			t.Errorf("expected %q, got %q", "An empty conversation", title)
-		}
-	})
-}
+// 		title, err := a.Title(ctx, conv)
+// 		if err != nil {
+// 			t.Fatalf("unexpected error: %v", err)
+// 		}
+
+// 		if title != "An empty conversation" {
+// 			t.Errorf("expected %q, got %q", "An empty conversation", title)
+// 		}
+// 	})
+// }

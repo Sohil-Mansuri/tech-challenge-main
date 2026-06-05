@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/openai/openai-go/v2 v2.1.0
+	github.com/philippgille/chromem-go v0.7.0
 	github.com/twitchtv/twirp v8.1.3+incompatible
 	go.mongodb.org/mongo-driver v1.17.4
 	go.opentelemetry.io/otel v1.35.0

@@ -8,6 +8,7 @@ import (
 
 	"github.com/acai-travel/tech-challenge/internal/chat/assistant/tool"
 	"github.com/acai-travel/tech-challenge/internal/chat/model"
+	"github.com/acai-travel/tech-challenge/internal/rag"
 	"github.com/openai/openai-go/v2"
 )
 
@@ -22,13 +23,14 @@ type Assistant struct {
 }
 
 // New creates a new Assistant with all available tools registered.
-func New() *Assistant {
+func New(ragDB *rag.DB) *Assistant {
 
 	tools := []tool.Tool{
 		&tool.DateTool{},
 		&tool.WeatherTool{},
 		&tool.HolidaysTool{},
 		&tool.CountryTool{},
+		&tool.KnowledgeBaseTool{DB: ragDB},
 	}
 
 	// build tool definitions ONCE at startup

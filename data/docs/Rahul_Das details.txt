@@ -1,0 +1,115 @@
+Name: Rahul Das
+
+PROFESSIONAL SUMMARY
+ Having 5.2 years of experience in Software development.
+ 3.4 years of experience as a Full Stack Developer in Dot Net.
+ Experienced in ASP.NET Core ,Web API, Angular 14.
+ Good Knowledge in Azure DevOps concepts like CI and CD.
+ Experience on developing web services like REST, Web API'S, Microservices etc.
+ Experience in how to create and run a containerized application using Docker.
+ Extensively worked on building single page applications using Angular for smooth navigation within the
+application.
+ Extensive experience in designing fronted web-based form using Angular 14
+ Experience in Analysis, Design, Development and Implementation of various web, stand-alone, client-server
+applications using ASP.NET Core, and SQL.
+TECHNICAL SKILLS
+ Web Technologies: HTML, CSS, AJAX, JQuery, Bootstrap, ASP.NET Core
+ Framework: Angular 14, ASP.NET Core
+ Other Tools: JIRA, Docker, Kubernetes
+ Database: MYSQL and SQL Server
+ Operating Systems: Windows 10,11, Linux
+ Cloud Servers: Amazon Web Services(AWS), EC2
+ Version Controls: GIT, Gitlab
+
+WORK EXPERIENCE
+Company Name: Ecotech IT Solutions Pvt Ltd
+Role: Sr. Software Developer
+Nov 2021 – Till Date
+Responsibilities And Work Experience:
+ Working on an Agile (Scrum) Development Team to deliver regular updates to business team and project
+managers.
+ Fixed the legacy code and made it available for the initial production deployment - Release One
+ Develop, test, and maintain web applications using ASP.NET Core.
+ Collaborated with cross-functional teams to define, design, and ship new features.
+ Optimize existing code for better performance and maintainability.
+ Design and implement database schemas using SQL Server or other relational databases.
+ Develop and maintain RESTful APIs for seamless integration with other systems.
+ Document code, workflows, and system architecture.
+ As a developer, participated in all the team meetings and code analysis.
+ Write efficient and optimized database queries.
+ Implemented various screens for the front end using Angular and used various predefined components from NPM
+(Node Package Manager).
+ Worked in upgrading the libraries and packages for the legacy application.
+ Worked in using Angular components, directives, services, decorators, dependency injection, pipes and templates.
+ Involved to troubleshooting/performance tuning to improve MySQL performance
+ Used Object Oriented Programming concepts to develop UI components that could be reused across the Web
+Application.
+ Extensively used Git for version controlling and regularly pushed the code to GitHub.
+ Used JIRA as the bug tracking system to track and maintain the history of bugs/issues on everyday basis.
+
+ Developed single page applications using Angular 14 Typescript, HTML, CSS3, and Bootstrap5.
+ Contribute to the continuous improvement of development process.
+ Debug and resolve technical issues and bugs.
+ Develop and maintain web application using Angular, ASP.NET Core.
+Environment: Angular, ASP.NET Core ,SQL Server, JSON, Web API, C#, Azure
+DevOps, Git, Agile Methodology
+Company Name: Agrowon Agrotech Industries Pvt Ltd
+Role: Software Developer
+Apr 2021 – Nov 2021
+Responsibilities And Work Experience:
+ Developed the ecommerce website and mobile application.
+ Implemented a dynamic product catalog system with features like product categorization, search, and filtering.
+ Integrated secure payment gateways to facilitate online transactions, ensuring data protection and customer trust.
+ Developed a reliable shopping cart system and a streamlined checkout process to improve conversion rates.
+ Created an efficient order management system to track and process orders, enhancing customer satisfaction.
+ Implemented real-time inventory management to keep track of product availability and prevent over-selling.
+ Ensured robust user authentication and authorization, with role-based access control for admin and customer roles.
+ Developed a mobile-friendly and responsive design, catering to a wide range of devices and screen sizes.
+ Built the application with scalability in mind to accommodate future growth and evolving business needs
+ Created comprehensive documentation for the application, facilitating easy maintenance and future updates
+ Performed the System Testing, Regression Testing for Complete UI after fixing the Issues which are reported by
+Testing Team.
+ Deployed the e-commerce application on a reliable hosting environment, ensuring maximum uptime and
+performance.
+ Provided ongoing support and maintenance to address issues, implement updates, and enhance functionality.
+Environment: HTML, Asp.Net Core, Git hub, Restful API, SQL Server, Angular
+
+Company Name: Seisotech Pvt Ltd
+Role: Software Developer
+Sep 2020 – Mar 2021
+Responsibilities And Work Experience:
+ Integrate third-party APIs and services for various functionalities, such as payment gateways and social media
+platforms.
+ Design and maintain relational databases, including creating tables, defining relationships, and optimizing queries.
+ Use Eloquent ORM or other Laravel tools for efficient database interactions.
+ Create and maintain technical documentation for code, APIs, and configurations.
+ Work closely with other team members, including designers, front-end developers, and project managers, to
+achieve project goals.
+ Keep Laravel and other dependencies up to date to take advantage of new features and security fixes.
+ Optimize application performance through caching, database tuning, and code improvements.
+ Utilize version control systems (Git) to manage and track code changes.
+ Collaborate with front-end developers to integrate UI/UX elements into the application.
+ Implement responsive design and ensure cross-browser compatibility.
+Environment: HTML, CSS3, JavaScript, Bootstrap, Ajax, Jquery, Restful API, PHP, Laravel, MySQL
+
+Company Name: Reformist India IT Solutions Pvt. Ltd.
+Role: Jr. PHP Developer
+June 2019 – Aug 2020
+Responsibilities And Work Experience:
+ Understanding the syntax, basic concepts, and best practices for PHP development.
+ Reviewing and analyzing PHP code written by senior’s developers for learning and understand coding standards.
+ Providing support to senior developers by assisting in the development of new features or modules in PHP
+applications.
+ Identifying and fixing bugs or issues in PHP code. This may involve debugging, troubleshooting, and testing.
+ Creating and maintaining documentation related to PHP projects.
+ Writing and running test cases to ensure the quality and reliability of PHP code is part of the learning process.
+ Learning how to interact with databases using PHP and SQL.
+ Work in small task and support under the guidance of seniors developers.
+Environment: HTML, CSS, JavaScript, Bootstrap, Ajax, PHP, CodeIgniter
+
+EDUCATION
+Master of Computer Application from Savitribai Phule Pune University.
+PERSONAL DETAILS:
+Name: Rahul Ramdas Mahabare
+Address: Gondhale Nagar,Hadapsar, Pune.
+Linkedin URL: https://www.linkedin.com/in/rahul-mahabare-8070b313b/?originalSubdomain=in
