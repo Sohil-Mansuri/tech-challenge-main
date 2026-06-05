@@ -16,3 +16,6 @@ up:
 
 down:
 	docker compose down
+	
+ingest:
+    go run ./cmd/ingest
